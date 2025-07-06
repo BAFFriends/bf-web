@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   Typography,
   Paper,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { mockApiService } from '../services/mockData';
 import { Resume, Incentive, JobPosting } from '../services/api';
 

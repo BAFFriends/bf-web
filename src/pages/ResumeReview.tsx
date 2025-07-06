@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
   Card,
   CardContent,
   FormControl,
@@ -24,6 +23,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { Visibility as VisibilityIcon } from '@mui/icons-material';
 import { mockApiService } from '../services/mockData';
 import { Resume } from '../services/api';

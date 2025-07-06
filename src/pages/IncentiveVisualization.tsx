@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   Paper,
@@ -14,6 +13,7 @@ import {
   TableRow,
   Chip,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { mockApiService } from '../services/mockData';
 import { Incentive } from '../services/api';

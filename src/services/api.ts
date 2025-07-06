@@ -28,16 +28,42 @@ export interface Incentive {
 export interface JobPosting {
   id: string;
   title: string;
-  description: string;
-  requirements: string[];
-  benefits: string[];
-  salary: string;
+  companyName: string;
+  jobPosition: string;
+  jobDescription: string;
+  recruitmentCount: number;
   location: string;
-  workType: 'full-time' | 'part-time' | 'contract';
-  disabilityFriendly: boolean;
+  employmentType: 'full-time' | 'part-time' | 'contract' | 'internship';
+  workingHours: string;
+  workingDays: string;
+  monthlySalary: string;
+  educationLevel: 'elementary' | 'middle' | 'high' | 'college' | 'university' | 'graduate' | 'none';
+  experienceLevel: 'none' | 'entry' | '1-3' | '3-5' | '5-10' | '10+';
+  disabilityType: 'physical' | 'visual' | 'hearing' | 'intellectual' | 'mental' | 'multiple' | 'all';
+  gender: 'male' | 'female' | 'any';
+  ageRange: string;
+  image?: string;
   status: 'draft' | 'published' | 'closed';
   createdAt: string;
   updatedAt: string;
+  // LLM 분석 결과
+  llmAnalyzed?: boolean;
+  beforeLlm?: {
+    jobPosition?: string;
+    jobDescription?: string;
+    recruitmentCount?: number;
+    location?: string;
+    disabilityType?: string;
+  };
+  afterLlm?: {
+    jobPosition?: string;
+    jobDescription?: string;
+    recruitmentCount?: number;
+    location?: string;
+    disabilityType?: string;
+    category?: string;
+    detailedDescription?: string;
+  };
 }
 
 class ApiService {

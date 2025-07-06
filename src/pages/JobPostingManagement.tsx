@@ -20,17 +20,20 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
   Card,
   CardContent,
   IconButton,
-  Fab,
+  CircularProgress,
+  Alert,
+  Divider,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { 
   Add as AddIcon, 
   Edit as EditIcon, 
   Delete as DeleteIcon,
-  Visibility as VisibilityIcon 
+  Visibility as VisibilityIcon,
+  CloudUpload as CloudUploadIcon
 } from '@mui/icons-material';
 import { mockApiService } from '../services/mockData';
 import { JobPosting } from '../services/api';
@@ -42,15 +45,24 @@ export default function JobPostingManagement() {
   const [editMode, setEditMode] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [llmAnalyzing, setLlmAnalyzing] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
-    requirements: '',
-    benefits: '',
-    salary: '',
+    companyName: '',
+    jobPosition: '',
+    jobDescription: '',
+    recruitmentCount: 1,
     location: '',
-    workType: 'full-time' as JobPosting['workType'],
-    disabilityFriendly: true,
+    employmentType: 'full-time' as JobPosting['employmentType'],
+    workingHours: '',
+    workingDays: '',
+    monthlySalary: '',
+    educationLevel: 'none' as JobPosting['educationLevel'],
+    experienceLevel: 'none' as JobPosting['experienceLevel'],
+    disabilityType: 'all' as JobPosting['disabilityType'],
+    gender: 'any' as JobPosting['gender'],
+    ageRange: '',
+    image: '',
     status: 'draft' as JobPosting['status'],
   });
 
@@ -72,13 +84,21 @@ export default function JobPostingManagement() {
   const handleCreate = () => {
     setFormData({
       title: '',
-      description: '',
-      requirements: '',
-      benefits: '',
-      salary: '',
+      companyName: '',
+      jobPosition: '',
+      jobDescription: '',
+      recruitmentCount: 1,
       location: '',
-      workType: 'full-time',
-      disabilityFriendly: true,
+      employmentType: 'full-time',
+      workingHours: '',
+      workingDays: '',
+      monthlySalary: '',
+      educationLevel: 'none',
+      experienceLevel: 'none',
+      disabilityType: 'all',
+      gender: 'any',
+      ageRange: '',
+      image: '',
       status: 'draft',
     });
     setEditMode(true);
@@ -90,13 +110,21 @@ export default function JobPostingManagement() {
   const handleEdit = (posting: JobPosting) => {
     setFormData({
       title: posting.title,
-      description: posting.description,
-      requirements: posting.requirements.join('\n'),
-      benefits: posting.benefits.join('\n'),
-      salary: posting.salary,
+      companyName: posting.companyName,
+      jobPosition: posting.jobPosition,
+      jobDescription: posting.jobDescription,
+      recruitmentCount: posting.recruitmentCount,
       location: posting.location,
-      workType: posting.workType,
-      disabilityFriendly: posting.disabilityFriendly,
+      employmentType: posting.employmentType,
+      workingHours: posting.workingHours,
+      workingDays: posting.workingDays,
+      monthlySalary: posting.monthlySalary,
+      educationLevel: posting.educationLevel,
+      experienceLevel: posting.experienceLevel,
+      disabilityType: posting.disabilityType,
+      gender: posting.gender,
+      ageRange: posting.ageRange,
+      image: posting.image || '',
       status: posting.status,
     });
     setSelectedPosting(posting);
@@ -116,8 +144,7 @@ export default function JobPostingManagement() {
     try {
       const postingData = {
         ...formData,
-        requirements: formData.requirements.split('\n').filter(r => r.trim()),
-        benefits: formData.benefits.split('\n').filter(b => b.trim()),
+        recruitmentCount: Number(formData.recruitmentCount),
       };
 
       if (selectedPosting) {
@@ -126,8 +153,11 @@ export default function JobPostingManagement() {
           posting.id === selectedPosting.id ? updatedPosting : posting
         ));
       } else {
+        // 새 채용공고 생성 시 LLM 분석 과정 표시
+        setLlmAnalyzing(true);
         const newPosting = await mockApiService.createJobPosting(postingData);
-        await fetchJobPostings(); // Fetch fresh data to avoid duplicates
+        setLlmAnalyzing(false);
+        await fetchJobPostings();
       }
       
       setDialogOpen(false);
@@ -135,6 +165,7 @@ export default function JobPostingManagement() {
       setViewMode(false);
       setSelectedPosting(null);
     } catch (error) {
+      setLlmAnalyzing(false);
       console.error('Failed to save job posting:', error);
     }
   };
@@ -168,12 +199,71 @@ export default function JobPostingManagement() {
     }
   };
 
-  const getWorkTypeText = (workType: JobPosting['workType']) => {
-    switch (workType) {
+  const getEmploymentTypeText = (employmentType: JobPosting['employmentType']) => {
+    switch (employmentType) {
       case 'full-time': return '정규직';
       case 'part-time': return '파트타임';
       case 'contract': return '계약직';
-      default: return workType;
+      case 'internship': return '인턴';
+      default: return employmentType;
+    }
+  };
+
+  const getEducationLevelText = (educationLevel: JobPosting['educationLevel']) => {
+    switch (educationLevel) {
+      case 'none': return '무관';
+      case 'elementary': return '초등학교';
+      case 'middle': return '중학교';
+      case 'high': return '고등학교';
+      case 'college': return '전문대학';
+      case 'university': return '대학교';
+      case 'graduate': return '대학원';
+      default: return educationLevel;
+    }
+  };
+
+  const getExperienceLevelText = (experienceLevel: JobPosting['experienceLevel']) => {
+    switch (experienceLevel) {
+      case 'none': return '무관';
+      case 'entry': return '신입';
+      case '1-3': return '1-3년';
+      case '3-5': return '3-5년';
+      case '5-10': return '5-10년';
+      case '10+': return '10년 이상';
+      default: return experienceLevel;
+    }
+  };
+
+  const getDisabilityTypeText = (disabilityType: JobPosting['disabilityType']) => {
+    switch (disabilityType) {
+      case 'all': return '전체';
+      case 'physical': return '지체';
+      case 'visual': return '시각';
+      case 'hearing': return '청각';
+      case 'intellectual': return '지적';
+      case 'mental': return '정신';
+      case 'multiple': return '중복';
+      default: return disabilityType;
+    }
+  };
+
+  const getGenderText = (gender: JobPosting['gender']) => {
+    switch (gender) {
+      case 'male': return '남성';
+      case 'female': return '여성';
+      case 'any': return '무관';
+      default: return gender;
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData({ ...formData, image: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -201,9 +291,12 @@ export default function JobPostingManagement() {
           <TableHead>
             <TableRow>
               <TableCell>제목</TableCell>
-              <TableCell>근무 형태</TableCell>
-              <TableCell>위치</TableCell>
-              <TableCell>장애인 친화</TableCell>
+              <TableCell>회사명</TableCell>
+              <TableCell>직무</TableCell>
+              <TableCell>고용형태</TableCell>
+              <TableCell>지역</TableCell>
+              <TableCell>장애유형</TableCell>
+              <TableCell>LLM 분석</TableCell>
               <TableCell>상태</TableCell>
               <TableCell>작성일</TableCell>
               <TableCell>액션</TableCell>
@@ -213,12 +306,21 @@ export default function JobPostingManagement() {
             {jobPostings.map((posting) => (
               <TableRow key={posting.id}>
                 <TableCell>{posting.title}</TableCell>
-                <TableCell>{getWorkTypeText(posting.workType)}</TableCell>
+                <TableCell>{posting.companyName}</TableCell>
+                <TableCell>{posting.jobPosition}</TableCell>
+                <TableCell>{getEmploymentTypeText(posting.employmentType)}</TableCell>
                 <TableCell>{posting.location}</TableCell>
                 <TableCell>
                   <Chip 
-                    label={posting.disabilityFriendly ? '예' : '아니오'} 
-                    color={posting.disabilityFriendly ? 'success' : 'default'}
+                    label={getDisabilityTypeText(posting.disabilityType)} 
+                    color="primary"
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Chip 
+                    label={posting.llmAnalyzed ? 'LLM 분석 완료' : '분석 대기'} 
+                    color={posting.llmAnalyzed ? 'success' : 'default'}
                     size="small"
                   />
                 </TableCell>
@@ -270,32 +372,142 @@ export default function JobPostingManagement() {
                 <Card>
                   <CardContent>
                     <Typography variant="h6" gutterBottom>{selectedPosting.title}</Typography>
-                    <Typography variant="body2" color="textSecondary" paragraph>
-                      {selectedPosting.description}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>요구사항</Typography>
-                    <ul>
-                      {selectedPosting.requirements.map((req, index) => (
-                        <li key={index}>{req}</li>
-                      ))}
-                    </ul>
-                    <Typography variant="subtitle1" gutterBottom>혜택</Typography>
-                    <ul>
-                      {selectedPosting.benefits.map((benefit, index) => (
-                        <li key={index}>{benefit}</li>
-                      ))}
-                    </ul>
-                    <Typography><strong>급여:</strong> {selectedPosting.salary}</Typography>
-                    <Typography><strong>위치:</strong> {selectedPosting.location}</Typography>
-                    <Typography><strong>근무 형태:</strong> {getWorkTypeText(selectedPosting.workType)}</Typography>
-                    <Typography><strong>장애인 친화:</strong> {selectedPosting.disabilityFriendly ? '예' : '아니오'}</Typography>
+                    
+                    {selectedPosting.llmAnalyzed ? (
+                      <>
+                        <Alert severity="success" sx={{ mb: 2 }}>
+                          LLM 분석이 완료되었습니다
+                        </Alert>
+                        
+                        <TableContainer component={Paper} sx={{ mb: 3 }}>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell><strong>분류</strong></TableCell>
+                                <TableCell><strong>LLM 전(수동입력)</strong></TableCell>
+                                <TableCell><strong>LLM 후</strong></TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>직무</TableCell>
+                                <TableCell>{selectedPosting.beforeLlm?.jobPosition || '-'}</TableCell>
+                                <TableCell>{selectedPosting.afterLlm?.jobPosition || '-'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>업무</TableCell>
+                                <TableCell>{selectedPosting.beforeLlm?.jobDescription || '-'}</TableCell>
+                                <TableCell>{selectedPosting.afterLlm?.jobDescription || '-'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>채용인원</TableCell>
+                                <TableCell>{selectedPosting.beforeLlm?.recruitmentCount || 0}명</TableCell>
+                                <TableCell>{selectedPosting.afterLlm?.recruitmentCount || 0}명</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>지역</TableCell>
+                                <TableCell>{selectedPosting.beforeLlm?.location || '-'}</TableCell>
+                                <TableCell>{selectedPosting.afterLlm?.location || '-'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>고용형태</TableCell>
+                                <TableCell>{getEmploymentTypeText(selectedPosting.employmentType)}</TableCell>
+                                <TableCell>{getEmploymentTypeText(selectedPosting.employmentType)}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>근무시간</TableCell>
+                                <TableCell>{selectedPosting.workingHours || 'null'}</TableCell>
+                                <TableCell>{selectedPosting.workingHours || 'null'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>근무일</TableCell>
+                                <TableCell>{selectedPosting.workingDays || 'null'}</TableCell>
+                                <TableCell>{selectedPosting.workingDays || 'null'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>월급</TableCell>
+                                <TableCell>{selectedPosting.monthlySalary || 'null'}</TableCell>
+                                <TableCell>{selectedPosting.monthlySalary || 'null'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>학력사항</TableCell>
+                                <TableCell>{getEducationLevelText(selectedPosting.educationLevel)}</TableCell>
+                                <TableCell>{getEducationLevelText(selectedPosting.educationLevel)}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>경력사항</TableCell>
+                                <TableCell>{getExperienceLevelText(selectedPosting.experienceLevel)}</TableCell>
+                                <TableCell>{getExperienceLevelText(selectedPosting.experienceLevel)}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>장애유형</TableCell>
+                                <TableCell>{selectedPosting.beforeLlm?.disabilityType || '-'}</TableCell>
+                                <TableCell>{selectedPosting.afterLlm?.disabilityType || '-'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>성별</TableCell>
+                                <TableCell>{getGenderText(selectedPosting.gender)}</TableCell>
+                                <TableCell>{getGenderText(selectedPosting.gender)}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>연령</TableCell>
+                                <TableCell>{selectedPosting.ageRange || '무관'}</TableCell>
+                                <TableCell>{selectedPosting.ageRange || '무관'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>직종</TableCell>
+                                <TableCell>x 자동임</TableCell>
+                                <TableCell>{selectedPosting.afterLlm?.category || '-'}</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+
+                        {selectedPosting.afterLlm?.detailedDescription && (
+                          <>
+                            <Typography variant="h6" gutterBottom>상세 분석 결과</Typography>
+                            <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+                              <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
+                                {selectedPosting.afterLlm.detailedDescription}
+                              </Typography>
+                            </Paper>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <Typography variant="body2" color="textSecondary" paragraph>
+                          {selectedPosting.jobDescription}
+                        </Typography>
+                        <Typography><strong>회사명:</strong> {selectedPosting.companyName}</Typography>
+                        <Typography><strong>직무:</strong> {selectedPosting.jobPosition}</Typography>
+                        <Typography><strong>채용인원:</strong> {selectedPosting.recruitmentCount}명</Typography>
+                        <Typography><strong>지역:</strong> {selectedPosting.location}</Typography>
+                        <Typography><strong>고용형태:</strong> {getEmploymentTypeText(selectedPosting.employmentType)}</Typography>
+                        <Typography><strong>근무시간:</strong> {selectedPosting.workingHours}</Typography>
+                        <Typography><strong>근무일:</strong> {selectedPosting.workingDays}</Typography>
+                        <Typography><strong>월급:</strong> {selectedPosting.monthlySalary}</Typography>
+                        <Typography><strong>학력사항:</strong> {getEducationLevelText(selectedPosting.educationLevel)}</Typography>
+                        <Typography><strong>경력사항:</strong> {getExperienceLevelText(selectedPosting.experienceLevel)}</Typography>
+                        <Typography><strong>장애유형:</strong> {getDisabilityTypeText(selectedPosting.disabilityType)}</Typography>
+                        <Typography><strong>성별:</strong> {getGenderText(selectedPosting.gender)}</Typography>
+                        <Typography><strong>연령:</strong> {selectedPosting.ageRange}</Typography>
+                      </>
+                    )}
+
+                    {selectedPosting.image && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle1" gutterBottom>이미지</Typography>
+                        <img src={selectedPosting.image} alt="채용공고 이미지" style={{ maxWidth: '100%', height: 'auto' }} />
+                      </Box>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
           ) : editMode ? (
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="제목"
@@ -303,64 +515,185 @@ export default function JobPostingManagement() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="설명"
-                  multiline
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="요구사항 (한 줄씩 입력)"
-                  multiline
-                  rows={4}
-                  value={formData.requirements}
-                  onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="혜택 (한 줄씩 입력)"
-                  multiline
-                  rows={4}
-                  value={formData.benefits}
-                  onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                  label="회사명"
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="급여"
-                  value={formData.salary}
-                  onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                  label="직무"
+                  value={formData.jobPosition}
+                  onChange={(e) => setFormData({ ...formData, jobPosition: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="위치"
+                  label="채용인원"
+                  type="number"
+                  value={formData.recruitmentCount}
+                  onChange={(e) => setFormData({ ...formData, recruitmentCount: Number(e.target.value) })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="업무 내용"
+                  multiline
+                  rows={4}
+                  value={formData.jobDescription}
+                  onChange={(e) => setFormData({ ...formData, jobDescription: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="지역"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel>근무 형태</InputLabel>
+                  <InputLabel>고용형태</InputLabel>
                   <Select
-                    value={formData.workType}
-                    onChange={(e) => setFormData({ ...formData, workType: e.target.value as JobPosting['workType'] })}
+                    value={formData.employmentType}
+                    onChange={(e) => setFormData({ ...formData, employmentType: e.target.value as JobPosting['employmentType'] })}
                   >
                     <MenuItem value="full-time">정규직</MenuItem>
                     <MenuItem value="part-time">파트타임</MenuItem>
                     <MenuItem value="contract">계약직</MenuItem>
+                    <MenuItem value="internship">인턴</MenuItem>
                   </Select>
                 </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="근무시간"
+                  placeholder="예: 09:00 - 18:00"
+                  value={formData.workingHours}
+                  onChange={(e) => setFormData({ ...formData, workingHours: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="근무일"
+                  placeholder="예: 월-금"
+                  value={formData.workingDays}
+                  onChange={(e) => setFormData({ ...formData, workingDays: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="월급"
+                  placeholder="예: 250만원"
+                  value={formData.monthlySalary}
+                  onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>학력사항</InputLabel>
+                  <Select
+                    value={formData.educationLevel}
+                    onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value as JobPosting['educationLevel'] })}
+                  >
+                    <MenuItem value="none">무관</MenuItem>
+                    <MenuItem value="elementary">초등학교</MenuItem>
+                    <MenuItem value="middle">중학교</MenuItem>
+                    <MenuItem value="high">고등학교</MenuItem>
+                    <MenuItem value="college">전문대학</MenuItem>
+                    <MenuItem value="university">대학교</MenuItem>
+                    <MenuItem value="graduate">대학원</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>경력사항</InputLabel>
+                  <Select
+                    value={formData.experienceLevel}
+                    onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value as JobPosting['experienceLevel'] })}
+                  >
+                    <MenuItem value="none">무관</MenuItem>
+                    <MenuItem value="entry">신입</MenuItem>
+                    <MenuItem value="1-3">1-3년</MenuItem>
+                    <MenuItem value="3-5">3-5년</MenuItem>
+                    <MenuItem value="5-10">5-10년</MenuItem>
+                    <MenuItem value="10+">10년 이상</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>장애유형</InputLabel>
+                  <Select
+                    value={formData.disabilityType}
+                    onChange={(e) => setFormData({ ...formData, disabilityType: e.target.value as JobPosting['disabilityType'] })}
+                  >
+                    <MenuItem value="all">전체</MenuItem>
+                    <MenuItem value="physical">지체</MenuItem>
+                    <MenuItem value="visual">시각</MenuItem>
+                    <MenuItem value="hearing">청각</MenuItem>
+                    <MenuItem value="intellectual">지적</MenuItem>
+                    <MenuItem value="mental">정신</MenuItem>
+                    <MenuItem value="multiple">중복</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>성별</InputLabel>
+                  <Select
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as JobPosting['gender'] })}
+                  >
+                    <MenuItem value="any">무관</MenuItem>
+                    <MenuItem value="male">남성</MenuItem>
+                    <MenuItem value="female">여성</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="연령"
+                  placeholder="예: 20-40세"
+                  value={formData.ageRange}
+                  onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="subtitle1">이미지</Typography>
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<CloudUploadIcon />}
+                    sx={{ mb: 2 }}
+                  >
+                    이미지 업로드
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </Button>
+                  {formData.image && (
+                    <Box sx={{ mt: 2 }}>
+                      <img src={formData.image} alt="미리보기" style={{ maxWidth: '200px', height: 'auto' }} />
+                    </Box>
+                  )}
+                </Box>
               </Grid>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
@@ -383,8 +716,17 @@ export default function JobPostingManagement() {
             <Button onClick={() => setDialogOpen(false)}>닫기</Button>
           ) : (
             <>
-              <Button onClick={() => setDialogOpen(false)}>취소</Button>
-              <Button onClick={handleSave} variant="contained">저장</Button>
+              <Button onClick={() => setDialogOpen(false)} disabled={llmAnalyzing}>취소</Button>
+              <Button onClick={handleSave} variant="contained" disabled={llmAnalyzing}>
+                {llmAnalyzing ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    LLM이 분석중입니다...
+                  </>
+                ) : (
+                  '저장'
+                )}
+              </Button>
             </>
           )}
         </DialogActions>

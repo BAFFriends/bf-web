@@ -85,48 +85,155 @@ export const mockJobPostings: JobPosting[] = [
   {
     id: '1',
     title: '프론트엔드 개발자 (장애인 우대)',
-    description: 'React 기반 웹 서비스 개발 및 유지보수',
-    requirements: ['React 3년 이상 경험', 'TypeScript 활용 가능', '웹 접근성 이해'],
-    benefits: ['4대보험', '유연근무제', '장애인 편의시설 완비'],
-    salary: '연봉 3,000~4,500만원',
+    companyName: '(주)디지털소프트',
+    jobPosition: '프론트엔드 개발자',
+    jobDescription: 'React 기반 웹 서비스 개발 및 유지보수를 담당하게 됩니다. 접근성을 고려한 웹 애플리케이션 개발 경험이 있으신 분을 환영합니다.',
+    recruitmentCount: 2,
     location: '서울시 강남구',
-    workType: 'full-time',
-    disabilityFriendly: true,
+    employmentType: 'full-time',
+    workingHours: '09:00 - 18:00',
+    workingDays: '월~금',
+    monthlySalary: '300만원',
+    educationLevel: 'university',
+    experienceLevel: '3-5',
+    disabilityType: 'all',
+    gender: 'any',
+    ageRange: '25-40세',
+    image: '',
     status: 'published',
     createdAt: '2024-01-10',
     updatedAt: '2024-01-10',
+    llmAnalyzed: false,
   },
   {
     id: '2',
     title: '백엔드 개발자 (장애인 채용)',
-    description: 'Spring Boot 기반 API 개발 및 데이터베이스 관리',
-    requirements: ['Java/Spring 5년 이상 경험', 'MySQL 활용 가능', '클라우드 경험 우대'],
-    benefits: ['성과급', '교육비 지원', '장애인 콜택시 지원'],
-    salary: '연봉 3,500~5,000만원',
+    companyName: '테크솔루션',
+    jobPosition: '백엔드 개발자',
+    jobDescription: 'Spring Boot 기반 API 개발 및 데이터베이스 관리 업무를 담당합니다. 클라우드 환경에서의 서비스 운영 경험이 있으신 분을 우대합니다.',
+    recruitmentCount: 1,
     location: '서울시 서초구',
-    workType: 'full-time',
-    disabilityFriendly: true,
+    employmentType: 'full-time',
+    workingHours: '10:00 - 19:00',
+    workingDays: '월~금',
+    monthlySalary: '350만원',
+    educationLevel: 'university',
+    experienceLevel: '5-10',
+    disabilityType: 'physical',
+    gender: 'any',
+    ageRange: '28-45세',
+    image: '',
     status: 'published',
     createdAt: '2024-01-12',
     updatedAt: '2024-01-15',
+    llmAnalyzed: false,
   },
   {
     id: '3',
     title: '데이터 분석가 (시각장애인 채용)',
-    description: 'Python을 활용한 데이터 분석 및 시각화',
-    requirements: ['Python 3년 이상 경험', 'SQL 활용 가능', '통계학 기초 지식'],
-    benefits: ['재택근무 가능', '스크린리더 지원', '점자 자료 제공'],
-    salary: '연봉 2,800~4,000만원',
+    companyName: '빅데이터솔루션',
+    jobPosition: '데이터 분석가',
+    jobDescription: 'Python을 활용한 데이터 분석 및 시각화 업무를 담당합니다. 스크린리더 사용 환경에서의 업무 수행이 가능하신 분을 모십니다.',
+    recruitmentCount: 1,
     location: '서울시 마포구',
-    workType: 'part-time',
-    disabilityFriendly: true,
+    employmentType: 'part-time',
+    workingHours: '09:00 - 14:00',
+    workingDays: '월~금',
+    monthlySalary: '280만원',
+    educationLevel: 'university',
+    experienceLevel: '3-5',
+    disabilityType: 'visual',
+    gender: 'any',
+    ageRange: '25-40세',
+    image: '',
     status: 'draft',
     createdAt: '2024-01-14',
     updatedAt: '2024-01-14',
+    llmAnalyzed: false,
   },
 ];
 
 class MockApiService {
+  // LLM 분석 시뮬레이션
+  private simulateLLMAnalysis(posting: any): any {
+    // 실제로는 LLM API를 호출하겠지만, 지금은 시뮬레이션
+    const beforeData = {
+      jobPosition: posting.jobPosition || '사원급',
+      jobDescription: posting.jobDescription || '팀원',
+      recruitmentCount: posting.recruitmentCount || 47,
+      location: posting.location || '서울 강남구, 부산',
+      disabilityType: posting.disabilityType === 'all' ? '장애정도 무관' : posting.disabilityType,
+    };
+
+    const afterData = {
+      jobPosition: '카지노 영업지원, 카지노 안전관리',
+      jobDescription: '카지노회계, 칩스, 전자게임',
+      recruitmentCount: 4,
+      location: '서울 강남구',
+      disabilityType: '색맹, 색약 지원불가',
+      category: '서비스 > 호텔·리조트·숙박, 고객상담·리서치·영업 > 영업관리·지원',
+      detailedDescription: `✅ [모집 대상에 대한 명시]
+• 구분: 「장애인고용촉진 및 직업재활법」 제2조 제1호에 따른 장애인
+• 응시자격: 위 법령에 해당하는 등록 장애인에 한하여 지원 가능
+• 우대사항:
+    ◦ 장애인 제한 채용 또는 장애인 우대 채용 형태로 진행
+    ◦ (공고 내 표기: 일부 직무는 "장애인만 응시 가능"으로 명시되어 있음)
+
+✅ [모집직무 및 인원 중 장애인 대상]
+• 모집직군:
+    ◦ 카지노 영업지원, 카지노 안전관리 장애인만 응시 가능
+• 모집인원:
+    ◦ 총 4명
+• 근무지역:
+    ◦ 본사(서울)
+
+✅ [전형절차 및 가점 안내 – 장애인 관련 내용]
+• 서류전형 → 필기전형 → 면접전형 단계에서
+    ◦ 장애인 응시자는 관련 법령에 따른 가점 부여:
+        ▪ 서류전형 가점: 없음 (정량평가 기준으로 진행)
+        ▪ 필기전형 가점:
+            • 장애인 응시자 전원에게 만점의 10% 가점 부여
+            • 단, 과락 과목 존재 시 가점 적용 불가
+        ▪ 면접전형 가점:
+            • 없음 (면접은 정성 평가로만 이루어짐)
+
+✅ [장애인 응시자 편의지원 안내]
+• 편의지원 제공 가능:
+    ◦ 신청자에 한하여 제공되며, 신청 방법은 다음과 같음:
+        1. 원서접수 시 [장애인 편의지원 요청서]를 첨부
+        2. 의료기관 진단서 등 증빙서류 함께 제출
+• 제공 가능한 예시:
+    ◦ 휠체어 접근 가능한 시험장
+    ◦ 시험 시간 연장
+    ◦ 점자 문제지, 확대문제지 제공 등
+• 신청기한: 원서 접수 마감일까지
+
+✅ [기타 유의사항]
+• 장애인 증빙은 필기전형 전까지 제출
+• 불합격 기준:
+    ◦ 지원자격 미달
+    ◦ 제출서류 미비
+    ◦ 허위 기재 시 불합격 처리`
+    };
+
+    return {
+      ...posting,
+      llmAnalyzed: true,
+      beforeLlm: beforeData,
+      afterLlm: afterData,
+      // LLM 분석 후 기본 데이터도 업데이트
+      jobPosition: afterData.jobPosition,
+      jobDescription: afterData.jobDescription,
+      recruitmentCount: afterData.recruitmentCount,
+      location: afterData.location,
+      educationLevel: 'none',
+      experienceLevel: 'none',
+      disabilityType: 'multiple', // 색맹, 색약은 multiple로 분류
+      gender: 'any',
+      ageRange: '무관',
+    };
+  }
+
   async getResumes(): Promise<Resume[]> {
     return new Promise(resolve => {
       setTimeout(() => resolve(mockResumes), 500);
@@ -174,16 +281,29 @@ class MockApiService {
 
   async createJobPosting(jobPosting: Omit<JobPosting, 'id' | 'createdAt' | 'updatedAt'>): Promise<JobPosting> {
     return new Promise(resolve => {
+      // LLM 분석 시뮬레이션 (5초 지연)
       setTimeout(() => {
-        const newPosting: JobPosting = {
+        const basePosting: JobPosting = {
           ...jobPosting,
           id: Date.now().toString(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        mockJobPostings.push(newPosting);
-        resolve(newPosting);
-      }, 300);
+        
+        // LLM 분석 실행
+        const analyzedPosting = this.simulateLLMAnalysis(basePosting);
+        mockJobPostings.push(analyzedPosting);
+        resolve(analyzedPosting);
+      }, 5000); // 5초 지연
+    });
+  }
+
+  // LLM 분석 진행상황을 확인하는 메서드 (선택사항)
+  async checkLLMAnalysisStatus(id: string): Promise<{ analyzing: boolean; progress: number }> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({ analyzing: false, progress: 100 });
+      }, 100);
     });
   }
 
